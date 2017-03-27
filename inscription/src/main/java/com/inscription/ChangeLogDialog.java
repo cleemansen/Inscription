@@ -33,6 +33,7 @@ import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -86,7 +87,7 @@ public class ChangeLogDialog {
     }
 
     //Parse a the release tag and appends it to the changelog builder
-    private void parseReleaseTag(final StringBuilder changelogBuilder, final XmlPullParser resourceParser) throws XmlPullParserException, IOException {
+    private void parseReleaseTag(final StringBuilder changelogBuilder, final Resources resources, final XmlPullParser resourceParser) throws XmlPullParserException, IOException {
         changelogBuilder.append("<h1>Release: ").append(resourceParser.getAttributeValue(null, "version")).append("</h1>");
 
         //Add date if available
@@ -97,6 +98,16 @@ public class ChangeLogDialog {
         //Add summary if available
         if (resourceParser.getAttributeValue(null, "summary") != null) {
             changelogBuilder.append("<span class='summary'>").append(resourceParser.getAttributeValue(null, "summary")).append("</span>");
+        }
+
+        //Add summary-file if available
+        if (resourceParser.getAttributeValue(null, "summary-file") != null) {
+            String useFile = resourceParser.getAttributeValue(null, "summary-file");
+            if ("true".equals(useFile)) {
+                InputStream whatsNewStream = resources.openRawResource(R.raw.whats_new);
+                String whatsNew = convertStreamToString(whatsNewStream);
+                changelogBuilder.append("<span class='summary-file'>").append(whatsNew).append("</span>");
+            }
         }
 
         changelogBuilder.append("<ul>");
@@ -111,6 +122,11 @@ public class ChangeLogDialog {
             eventType = resourceParser.next();
         }
         changelogBuilder.append("</ul>");
+    }
+
+    private String convertStreamToString(java.io.InputStream is) {
+        java.util.Scanner s = new java.util.Scanner(is, "UTF-8").useDelimiter("\\A");
+        return s.hasNext() ? s.next() : "";
     }
 
     //CSS style for the html
@@ -141,7 +157,7 @@ public class ChangeLogDialog {
                     //When version is 0 every release tag is parsed.
                     final int versioncode = Integer.parseInt(xml.getAttributeValue(null, "versioncode"));
                     if ((version == 0) || (versioncode == version)) {
-                        parseReleaseTag(changelogBuilder, xml);
+                        parseReleaseTag(changelogBuilder, resources, xml);
                         releaseFound = true; //At lease one release tag has been parsed.
                     }
                 }
