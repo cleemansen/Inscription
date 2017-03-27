@@ -1,16 +1,17 @@
 apply plugin: 'com.android.library'
-apply plugin: 'com.github.dcendents.android-maven'
-
-group = 'com.github.ninniuz'
+apply from: "$rootDir/tools/linters.gradle"
+apply from: "$rootDir/tools/publish.gradle"
+apply from: "$rootDir/tools/jacoco.gradle"
 
 android {
-    compileSdkVersion 25
-    buildToolsVersion "25.0.1"
+    compileSdkVersion rootProject.ext.compileSdkVersion
+    buildToolsVersion rootProject.ext.buildToolsVersion
+
     defaultConfig {
-        minSdkVersion 8
-        targetSdkVersion 25
-        versionCode 101
-        versionName "1.0.1"
+        minSdkVersion rootProject.ext.minSdkVersion
+        targetSdkVersion rootProject.ext.targetSdkVersion
+        versionCode rootProject.ext.versionCode
+        versionName rootProject.ext.versionName
     }
     buildTypes {
         release {
